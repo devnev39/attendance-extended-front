@@ -7,10 +7,17 @@ import { BrowserRouter } from 'react-router-dom'
 import Students from './pages/Students/Students.jsx'
 import Attendance from "./pages/Attendance/Attendance.jsx";
 import Mark from "./pages/Mark/Mark.jsx";
-import { Box } from '@mui/material'
+import { Box, ThemeProvider, createTheme } from '@mui/material'
+
+const darkTheme = createTheme({
+  palette: {
+    mode: "light",
+  },
+});
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
+    <ThemeProvider theme={darkTheme}>
     <BrowserRouter>
     <Box>
       <App />
@@ -21,5 +28,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       </Routes>
       </Box>
     </BrowserRouter>
+    </ThemeProvider>
   </React.StrictMode>,
 )
