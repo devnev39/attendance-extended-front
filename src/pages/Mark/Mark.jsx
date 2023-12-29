@@ -1,77 +1,15 @@
-import { Alert, Box, Button, Grid, IconButton, Snackbar, TextField, Toolbar, darken, lighten } from "@mui/material";
+import { Alert, Box, Button, Grid, IconButton, Snackbar, TextField, Toolbar } from "@mui/material";
 import VideocamIcon from '@mui/icons-material/Videocam';
 import VideocamOffIcon from '@mui/icons-material/VideocamOff';
 import CameraIcon from '@mui/icons-material/Camera';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import SaveIcon from '@mui/icons-material/Save';
+import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import { useEffect, useRef, useState } from "react";
 import { Urls } from "../../config/url";
-import { DataGrid, useGridApiRef } from "@mui/x-data-grid";
-import styled from "@emotion/styled";
+import { useGridApiRef } from "@mui/x-data-grid";
 import { LoadingButton } from "@mui/lab";
-
-const getBackgroundColor = (color, mode) =>
-  mode === 'dark' ? darken(color, 0.7) : lighten(color, 0.7);
-
-const getHoverBackgroundColor = (color, mode) =>
-  mode === 'dark' ? darken(color, 0.6) : lighten(color, 0.6);
-
-const getSelectedBackgroundColor = (color, mode) =>
-  mode === 'dark' ? darken(color, 0.5) : lighten(color, 0.5);
-
-const getSelectedHoverBackgroundColor = (color, mode) =>
-  mode === 'dark' ? darken(color, 0.4) : lighten(color, 0.4);
-
-const StyledDataGrid = styled(DataGrid)(({ theme }) => ({
-    '& .super-app-theme--error': {
-        backgroundColor: getBackgroundColor(
-          theme.palette.error.main,
-          theme.palette.mode,
-        ),
-        '&:hover': {
-          backgroundColor: getHoverBackgroundColor(
-            theme.palette.error.main,
-            theme.palette.mode,
-          ),
-        },
-        '&.Mui-selected': {
-          backgroundColor: getSelectedBackgroundColor(
-            theme.palette.error.main,
-            theme.palette.mode,
-          ),
-          '&:hover': {
-            backgroundColor: getSelectedHoverBackgroundColor(
-              theme.palette.error.main,
-              theme.palette.mode,
-            ),
-          },
-        },
-    },
-    '& .super-app-theme--success': {
-      backgroundColor: getBackgroundColor(
-        theme.palette.success.main,
-        theme.palette.mode,
-      ),
-      '&:hover': {
-        backgroundColor: getHoverBackgroundColor(
-          theme.palette.success.main,
-          theme.palette.mode,
-        ),
-      },
-      '&.Mui-selected': {
-        backgroundColor: getSelectedBackgroundColor(
-          theme.palette.success.main,
-          theme.palette.mode,
-        ),
-        '&:hover': {
-          backgroundColor: getSelectedHoverBackgroundColor(
-            theme.palette.success.main,
-            theme.palette.mode,
-        ),
-        },
-        }
-    }
-}))
+import StyledDataGrid from "../../components/StyledDataGrid";
 
 const b64toBlob = (b64Data, contentType='', sliceSize=512) => {
     const byteCharacters = atob(b64Data);
@@ -224,6 +162,25 @@ const Mark = () => {
         })
     }
 
+    const getTestPhoto = () => {
+        if(!photoBlob){
+            setAlertMessage("No photo found ! Take photo first !");
+            setAlertSeverity("error");
+            setAlertOpen(true);
+            return;
+        }
+        setPhotoUploading(true);
+        let formdata = new FormData();
+        formdata.append("image", photoBlob);
+        fetch(`${Urls.baseUrl}/mark/api/v1/check-present-photo`,{
+            method: "POST",
+            body: formdata
+        }).then(resp => resp.blob()).then(blob => {
+            let file = window.URL.createObjectURL(blob);
+            window.location.assign(file);
+        }) 
+    }
+
     useEffect(() => {
         if(!camOn){
             setVideoSrcObj(null);
@@ -241,10 +198,6 @@ const Mark = () => {
             setAlertOpen(true);
         }
     },[camOn]);
-
-    // useEffect(() => {
-        
-    // },[camOn]);
 
     return (
         <>
@@ -265,9 +218,8 @@ const Mark = () => {
                         <CameraIcon fontSize="large" />
                     </IconButton>
                     <LoadingButton disabled={!photoBlob && true} loadingPosition="center" loading={photoUploading} size="1rem" startIcon={<CloudUploadIcon fontSize="large"/>} onClick={uploadPhoto} sx={{mx: "1rem"}}>
-                        {/* <IconButton disabled={!photoBlob && true} onClick={uploadPhoto} sx={{ml: "1rem"}}>
-                            <CloudUploadIcon fontSize="large" />
-                        </IconButton> */}
+                    </LoadingButton>
+                    <LoadingButton disabled={!photoBlob && true} loadingPosition="center" loading={photoUploading} size="1rem" startIcon={<CloudDownloadIcon fontSize="large"/>} onClick={getTestPhoto} sx={{mx: "1rem"}}>
                     </LoadingButton>
                     
                 </Box>
@@ -293,7 +245,7 @@ const Mark = () => {
                     />
                 </Box>
                 <Box sx={{width: "100%", display: "flex", justifyContent: "center", m: "1rem", gap: 2}}>
-                    <TextField type="date" id="dateInput" value={
+                    <TextField type="date" id="dateInput" defaultValue={
                         new Date().getFullYear() + "-" + new Date().getMonth() + "-" + new Date().getDate()
                     } />
                     <Button onClick={commitStudentResponse} startIcon={<SaveIcon />} variant="outlined" disabled={!studentResponse.length}>
