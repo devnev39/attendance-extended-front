@@ -1,3 +1,3 @@
 export const Urls = {
-    baseUrl: "http://localhost:8080",
+    baseUrl: "https://attendance-extended-back.onrender.com",
 }
