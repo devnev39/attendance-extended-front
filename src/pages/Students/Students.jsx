@@ -262,7 +262,6 @@ const Students = () => {
                         Upload Photo
                         <VisuallyHiddenInput onChange={(event) => {
                             setStudentPhoto(event.target.files[0]);
-                            console.log(event.target.files[0].name)
                         }} type="file" accept="image/png, image/jpeg" />
                     </Button>
                     <Typography>

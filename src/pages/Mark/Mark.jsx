@@ -1,4 +1,4 @@
-import { Alert, Box, Button, Grid, IconButton, Snackbar, TextField, Toolbar } from "@mui/material";
+import { Alert, Box, Button, Grid, IconButton, Snackbar, TextField, Toolbar, Typography } from "@mui/material";
 import VideocamIcon from '@mui/icons-material/Videocam';
 import VideocamOffIcon from '@mui/icons-material/VideocamOff';
 import CameraIcon from '@mui/icons-material/Camera';
@@ -10,6 +10,7 @@ import { Urls } from "../../config/url";
 import { useGridApiRef } from "@mui/x-data-grid";
 import { LoadingButton } from "@mui/lab";
 import StyledDataGrid from "../../components/StyledDataGrid";
+import styled from "@emotion/styled";
 
 const b64toBlob = (b64Data, contentType='', sliceSize=512) => {
     const byteCharacters = atob(b64Data);
@@ -53,6 +54,18 @@ const studentResponseColumns = [
     }
 ]
 
+const VisuallyHiddenInput = styled('input')({
+    clip: 'rect(0 0 0 0)',
+    clipPath: 'inset(50%)',
+    height: 1,
+    overflow: 'hidden',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    whiteSpace: 'nowrap',
+    width: 1,
+  });
+
 const Mark = () => {
     const videoH = "50%";
     const videoW = "75%";
@@ -95,10 +108,10 @@ const Mark = () => {
     const clickPhoto = () => {
         if(!canvasRef.current) return;
         if(!vref.current) return;
-        canvasRef.current.height = 480;
-        canvasRef.current.width = 720;
+        canvasRef.current.height = 1080;
+        canvasRef.current.width = 1920;
         const ctx = canvasRef.current.getContext("2d");
-        ctx.drawImage(vref.current,0,0,canvasRef.current.width,canvasRef.current.height);
+        ctx.drawImage(vref.current,0,0,1920,1080);
         let image = canvasRef.current.toDataURL("image/jpeg");
         const content_type = image.split(";")[0].split(":")[1];
         const bs64 = image.split(";")[1].split(",")[1];
@@ -205,7 +218,7 @@ const Mark = () => {
         <Grid container gap={2}>
             <Grid item xs={6} sx={{borderRight: "solid"}}>
                 <Box sx={{width: "100%",height: "auto", display: "flex", justifyContent: "center"}}>
-                    <video ref={vref} style={{"border": "solid", "borderRadius": "5px"}} autoPlay muted playsInline width={videoW} height={videoH}/>
+                    <video ref={vref} style={{"border": "solid", "borderRadius": "5px"}} height={480} width={720} autoPlay muted playsInline />
                     <canvas style={{"position": "absolute", "display": "none"}} ref={canvasRef} />
                 </Box>
                 <Box sx={{display: "flex", justifyContent: "center", my: "1rem"}}>
@@ -221,7 +234,15 @@ const Mark = () => {
                     </LoadingButton>
                     <LoadingButton disabled={!photoBlob && true} loadingPosition="center" loading={photoUploading} size="1rem" startIcon={<CloudDownloadIcon fontSize="large"/>} onClick={getTestPhoto} sx={{mx: "1rem"}}>
                     </LoadingButton>
-                    
+                </Box>
+                <Typography sx={{display: "flex", justifyContent: "center"}}>
+                    OR 
+                </Typography>
+                <Box sx={{display: "flex", justifyContent: "center", mt: "1rem"}}>
+                    <Button component="label" variant="outlined" startIcon={<CloudUploadIcon />}>
+                        Upload file
+                        <VisuallyHiddenInput onChange={(event) => {setPhotoBlob(event.target.files[0])}} type="file" accept="image/jpeg, image/png" />
+                    </Button>
                 </Box>
             </Grid>
             <Grid item xs={4}>
