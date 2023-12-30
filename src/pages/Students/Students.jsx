@@ -1,4 +1,4 @@
-import { Alert, Box, Button, Card, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Grid, Snackbar, TextField, Toolbar, Typography } from "@mui/material";
+import { Alert, Box, Button, Card, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Grid, LinearProgress, Snackbar, TextField, Toolbar, Typography } from "@mui/material";
 import LoadingButton from '@mui/lab/LoadingButton';
 import { useEffect, useState } from "react";
 import { styled } from '@mui/material/styles';
@@ -44,6 +44,8 @@ const Students = () => {
     // 3. Student data table
 
     const [students, setStudents] = useState([]);
+
+    const [connecting, setConnecting] = useState(false);
 
     const [alertOpen, setAlertOpen] = useState(false);
     const [alertSeverity, setAlertSeverity] = useState(null);
@@ -139,14 +141,17 @@ const Students = () => {
     }
 
     const fetchStudents = () => {
+        setConnecting(true);
         fetch(`${Urls.baseUrl}/student/api/v1/get-students`).then(resp => resp.json()).then(resp => {
             if(resp.status){
                 setStudents(resp.data);
+                setConnecting(false);
             }
             else {
                 setAlertSeverity("error");
                 setAlertMessage(resp.message ? resp.message : "Error while fetching data !");
                 setAlertOpen(true);
+                setConnecting(false);
             }
         })
     }
@@ -162,6 +167,7 @@ const Students = () => {
     return (
         <>
             <Toolbar />
+            {connecting ? <LinearProgress /> : null}
             <Grid container spacing={2} sx={{m: "0.1rem"}}>
                 <Grid item xs={6} sx={{borderRight: "solid", p: "1rem"}}>
                     <DataGrid

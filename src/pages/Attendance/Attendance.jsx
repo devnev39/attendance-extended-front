@@ -1,4 +1,4 @@
-import { Alert, Box, Grid, Snackbar, Toolbar, Typography } from "@mui/material";
+import { Alert, Box, Grid, LinearProgress, Snackbar, Toolbar, Typography } from "@mui/material";
 import { DataGrid, useGridApiRef } from "@mui/x-data-grid";
 import { useEffect, useState } from "react";
 import { Urls } from "../../config/url";
@@ -36,6 +36,8 @@ const Attendance = () => {
     const [alertSeverity, setAlertSeverity] = useState(null);
     const [alertMessage, setAlertMessage] = useState(null);
 
+    const [connecting, setConnecting] = useState(false);
+
     const [dates, setDates] = useState([]);
     const [attendance, setAttendance] = useState([]);
 
@@ -51,13 +53,16 @@ const Attendance = () => {
     };
 
     useEffect(() => {
+        setConnecting(true);
         fetch(`${Urls.baseUrl}/mark/api/v1/get-dates`).then(resp => resp.json()).then(resp => {
             if(resp.status){
                 setDates(resp.data);
+                setConnecting(false);
             }else{
                 setAlertMessage(resp.message ? resp.message : resp.detail ? resp.detail : "Error from backend !");
                 setAlertSeverity("error");
                 setAlertOpen(true); 
+                setConnecting(false);
             }
         })
     },[]);
@@ -68,14 +73,17 @@ const Attendance = () => {
 
     useEffect(() => {
         if(!currentDate) return;
+        setConnecting(true);
         fetch(`${Urls.baseUrl}/mark/api/v1/get-attendance?date=${currentDate}`).then(
             resp => resp.json()).then(resp => {
                 if(resp.status){
                     setAttendance(resp.data);
+                    setConnecting(false);
                 }else{
                     setAlertMessage(resp.message ? resp.message : resp.detail ? resp.detail : "Error from backend !");
                     setAlertSeverity("error");
                     setAlertOpen(true);
+                    setConnecting(false);
                 }
             })
     },[currentDate]);
@@ -83,6 +91,7 @@ const Attendance = () => {
     return (
         <>
         <Toolbar />
+        {connecting ? <LinearProgress fourColor/> : null}
         <Grid container sx={{mt: "2rem"}}>
             <Grid item xs={6}>
                 <Typography sx={{display: "flex", justifyContent: "center", textTransform:"uppercase", fontWeight: "bold", fontSize: "1.5rem"}}>
@@ -132,8 +141,7 @@ const Attendance = () => {
                 </Box>
 
             </Grid>
-        </Grid>
-        
+        </Grid>        
         <Snackbar sx={{display: "flex", justifyContent: "center", width: "100%"}} open={alertOpen} autoHideDuration={3000} onClose={handleAlertClose}>
             <Alert onClose={handleAlertClose} severity={alertSeverity}>
                 {alertMessage}
